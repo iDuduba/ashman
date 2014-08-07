@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:title="设置">
+
+    <PreferenceCategory android:title="地图" >
+        <CheckBoxPreference
+                android:title="使用本地地图?"
+                android:summaryOn="它很快，就是它了！"
+                android:summaryOff="不，我要更准确的在线地图！"
+                android:defaultValue="false"
+                android:key="@string/setting_local_map"/>
+
+        <CheckBoxPreference
+                android:title="使用被动模式上传照片?"
+                android:summaryOn="被动模式"
+                android:summaryOff="活动模式"
+                android:defaultValue="true"
+                android:key="@string/setting_ftp_upload_mode"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="杂项" >
+        <CheckBoxPreference
+                android:key="@string/setting_record_track"
+                android:title="记录车辆轨迹?"
+                android:summary="Enable or disable data updates"
+                android:defaultValue="true"/>
+
+        <ListPreference
+                android:key="@string/setting_gps_update_interval"
+                android:title="轨迹点采集频率"
+                android:summary="Define how often updates will be performed"
+                android:defaultValue="5"
+                android:entries="@array/updateInterval"
+                android:entryValues="@array/updateIntervalValues"
+                android:dependency="@string/setting_record_track"/>
+    </PreferenceCategory>
+
+</PreferenceScreen>

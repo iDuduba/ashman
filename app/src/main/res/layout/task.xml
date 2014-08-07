@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:background="@android:color/transparent">
+
+    <LinearLayout
+            android:id="@+id/filters"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentBottom="true">
+
+        <Button android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onNewList"
+                android:layout_weight="1"
+                android:text="未完成任务"/>
+
+        <Button android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onOldList"
+                android:layout_weight="1"
+                android:text="已完成任务"/>
+
+    </LinearLayout>
+
+    <ListView
+            android:id="@android:id/list"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="10dp"
+            android:layout_alignParentTop="true"
+            android:layout_above="@id/filters"
+            android:background="#88666666"/>
+
+    <TextView
+            android:id="@android:id/empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/empty"
+            android:layout_centerInParent="true"/>
+
+
+</RelativeLayout>

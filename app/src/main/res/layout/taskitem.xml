@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical"
+              android:background="#cccccc">
+
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="3dp">
+
+        <ImageView
+                android:id="@+id/status"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginTop="4dp">
+            <!--android:src="@drawable/finish">-->
+        </ImageView>
+
+        <Button android:id="@+id/expandable_toggle_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:text="..."/>
+
+        <TextView
+                android:id="@+id/sjzh"
+                android:layout_toLeftOf="@id/expandable_toggle_button"
+                android:layout_alignBottom="@id/status"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_marginLeft="3dp"
+                android:layout_marginRight="3dp"
+                android:gravity="center"
+                android:textSize="32sp"
+                android:textColor="#222222"
+                android:text="0"/>
+
+        <LinearLayout
+                android:id="@+id/detail"
+                android:orientation="vertical"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/status"
+                android:layout_toLeftOf="@id/sjzh"
+                android:layout_alignParentTop="true"
+                android:layout_alignBottom="@id/status">
+
+            <TextView
+                    android:id="@+id/accident"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:lines="1"
+                    android:textColor="#222222"
+                    android:layout_weight="1"/>
+            <TextView
+                    android:id="@+id/occur"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:textColor="#222222"
+                    android:layout_weight="1"/>
+        </LinearLayout>
+
+    </RelativeLayout>
+
+
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/expandable">
+
+        <View android:layout_width="fill_parent"
+              android:layout_height="2dp"
+              android:background="@android:color/darker_gray"/>
+
+        <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+            <Button
+                    android:id="@+id/t_run"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="1"
+                    android:text="执行"
+                    android:textSize="12dip"/>
+            <Button
+                    android:id="@+id/t_photo"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="1"
+                    android:text="照片"
+                    android:textSize="12dip"/>
+            <Button
+                    android:id="@+id/t_report"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="1"
+                    android:text="报告"
+                    android:textSize="12dip"/>
+            <Button
+                    android:id="@+id/t_path"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="1"
+                    android:text="轨迹"
+                    android:textSize="12dip"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

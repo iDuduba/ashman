@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">清道夫</string>
+
+    <string name="confirm">确定</string>
+    <string name="cancel">取消</string>
+    <string name="yes">是</string>
+
+    <string name="local_map">file:///mnt/sdcard/imhere/shanghai_traffic_7.tpk</string>
+    <string name="online_map">http://58.241.132.61:6080/arcgis/rest/services/YangZhou/YangZhou20140603/MapServer</string>
+    <!--<string name="online_map">http://863.laic-tech.com:8081/arcgis/rest/services/V10/shanghaimap/MapServer</string>-->
+
+    <string name="msg_gps_not_available">暂时无法获取GPS位置，请稍后再试</string>
+    <string name="msg_gps_out_of_service">GPS无法提供服务，请稍后再试</string>
+    <string name="msg_gps_turned_off">GPS定位跟踪模式已关闭</string>
+    <string name="msg_gps_turned_on">进入GPS定位跟踪模式</string>
+    <string name="msg_ban_gps_turned_off">任务模式下不能关闭GPS定位跟踪功能</string>
+    <string name="open_location_settings">GPS功能未启用，需要现在去系统设置中打开GPS功能吗？</string>
+    <string name="gps_not_enabled">GPS功能已关闭</string>
+    <string name="msg_gps_out_of_follow">离开GPS跟随模式</string>
+    <string name="msg_gps_out_of_range">当前位置已经超出本地图范围</string>
+
+    <string name="prompt_exit_application">再按一次退出应用程序</string>
+    <string name="prompt_loading_map_data">正在加载地图数据,请稍候...</string>
+
+    <string name="empty">没有数据!</string>
+
+    <string name="action_search">搜索</string>
+    <string name="action_settings">设置</string>
+    <string name="action_accidents">事故</string>
+    <string name="action_task">任务列表</string>
+    <string name="action_cancel_task">取消任务</string>
+    <string name="action_camera">拍照</string>
+
+    <string name="menu_delete">删除救援任务</string>
+    <string name="menu_select_task">启动救援任务</string>
+    <string name="menu_show_path">显示路径</string>
+
+
+    <string name="switch_cam">Switch Camera</string>
+    <string name="camera_alert">Device has only one camera!</string>
+
+
+    <string name="setting_local_map">using_local_map</string>
+    <string name="setting_record_track">record_track</string>
+    <string name="setting_gps_update_interval">gps_update_interval</string>
+    <string name="setting_ftp_upload_mode">ftp_upload_mode</string>
+
+    <string name="base_url">http://58.241.132.59:6080</string>
+    <string name="base_path">/ewayqz/qztask.do</string>
+
+    <string name="ftp_host">58.241.132.59</string>
+    <string name="ftp_user">qzuser</string>
+    <string name="ftp_password">qzuser!@#</string>
+
+
+    <string name="com_network_err">网络故障,稍后重试</string>
+
+</resources>
