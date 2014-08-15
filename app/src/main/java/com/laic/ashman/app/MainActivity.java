@@ -63,6 +63,9 @@ public class MainActivity extends AbstractAsyncActivity {
     private Button btnCamera;
     private Button btnReport;
 
+    private TextView txtJobNumber;
+    private TextView txtUserName;
+
     MapView mMapView;
     private LocationDisplayManager mLocService = null;
 
@@ -84,7 +87,7 @@ public class MainActivity extends AbstractAsyncActivity {
     protected void onStart() {
         super.onStart();
         Log.d(DEBUG_TAG, "onStart");
-        checkGpsSettings();
+//        checkGpsSettings();
     }
 
     /**
@@ -145,6 +148,11 @@ public class MainActivity extends AbstractAsyncActivity {
         btnReport = (Button) findViewById(R.id.take_report);
         btnReport.setVisibility(View.INVISIBLE);
 
+        txtJobNumber = (TextView) findViewById(R.id.jobNumber);
+        txtJobNumber.setText(getApplicationContext().getAccount());
+        txtUserName = (TextView) findViewById(R.id.userName);
+        txtUserName.setText(getApplicationContext().getUserName());
+
         // 如果include指定了id的话，就不能直接把它里面的控件当成主xml中的控件来直接获得了，
         // 必须先获得这个xml布局文件，再通过布局文件findViewById来获得其子控件。
 //        View taskLayout = getLayoutInflater().inflate(R.layout.info, null);
@@ -196,15 +204,19 @@ public class MainActivity extends AbstractAsyncActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d(DEBUG_TAG, "onDestroy");
+        Log.d(DEBUG_TAG, "onDestroy...");
 
-        SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+        String account = getApplicationContext().getAccount();
+        SharedPreferences pref = getSharedPreferences("task_info", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
-        if(currentTask != null && currentTask.isRunning()) {
-            editor.putInt("id", currentTask.getId());
-            editor.putInt("status", currentTask.getTaskZt());
+
+        if(currentTask != null) {
+            editor.putInt(account + ".id", currentTask.getId());
+            editor.putFloat(account + ".distance", mDistance);
+            editor.putLong(account + ".elapse", elapseField.getBase());
+            Log.d(DEBUG_TAG, "Saving task..." + account + ":" + currentTask.getTaskId());
         } else {
-            editor.putInt("id", 0);
+            editor.remove(account + ".id");
         }
         editor.commit();
 
@@ -215,8 +227,14 @@ public class MainActivity extends AbstractAsyncActivity {
     }
 
     private void launchTask(int taskRowId, boolean isContinue) {
+        launchTask(taskRowId, isContinue, 0.0f, SystemClock.elapsedRealtime());
+    }
+
+    private void launchTask(int taskRowId, boolean isContinue, float initDistance, long initElapse) {
+        Log.d(DEBUG_TAG, "Launching task..." + taskRowId);
         currentTask = queryTaskById(taskRowId);
         if(currentTask != null) {
+            Log.d(DEBUG_TAG, "Launching task..." + currentTask.getTaskId() + ":" + currentTask.getTaskZt());
 //            taskStatus = currentTask.getTaskZt();
             taskSection.setVisibility(View.VISIBLE);
 
@@ -241,18 +259,19 @@ public class MainActivity extends AbstractAsyncActivity {
                     break;
             }
 
-            distanceField.setText("0.0");
-            speedField.setText("0.0");
             taskField.setText(currentTask.getTaskId());
 
             gLayer.removeAll();
             markAccidentLocation(currentTask);
 
             prevLocation = null;
-            distance = 0.0f;
+            mDistance = initDistance;
+            distanceField.setText(String.valueOf(Util.round(mDistance /1000, 1, BigDecimal.ROUND_HALF_UP)));
 
             if(isContinue && currentTask.isStarted()) {
                 switchOnFollowMode();
+
+                elapseField.setBase(initElapse);
                 elapseField.start();
             }
         }
@@ -266,7 +285,12 @@ public class MainActivity extends AbstractAsyncActivity {
                         .show();
             } else {
                 int taskRowId = Integer.parseInt(event.get("id"));
-                launchTask(taskRowId, false);
+                int taskStatus = Integer.parseInt(event.get("status"));
+                if(taskStatus == TaskTable.TASK_NEW) {
+                    launchTask(taskRowId, false);
+                } else {
+                    launchTask(taskRowId, true);
+                }
             }
         } else  if(type.compareToIgnoreCase("upload") == 0) {
             String action = event.get("action");
@@ -306,21 +330,34 @@ public class MainActivity extends AbstractAsyncActivity {
         // so we need to set the listener only when menuitem is ready
         initMap();
 
-        SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
-        final int taskId = pref.getInt("id", 0);
-        if(taskId != 0) {
-            new AlertDialog.Builder(this)
-                    .setTitle("提示")
-                    .setMessage("继续中断的任务？")
-                    .setNegativeButton("取消", null)
-                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            launchTask(taskId, true);
-                        }
-                    })
-                    .create()
-                    .show();
+        final String account = getApplicationContext().getAccount();
+        final SharedPreferences pref = getSharedPreferences("task_info", Context.MODE_PRIVATE);
+        int taskRowId = pref.getInt(account + ".id", 0);
+        Log.d(DEBUG_TAG, "Resuming task..." + account + ":" + taskRowId);
+        final Task task = queryTaskById(taskRowId);
+        if(task != null) {
+            if(task.isRunning()) {
+                final float initDst = pref.getFloat(account + ".distance", 0.0f);
+                final long initElapse = pref.getLong(account + ".elapse", SystemClock.elapsedRealtime());
+
+                new AlertDialog.Builder(this)
+                        .setTitle("提示")
+                        .setMessage("继续中断的任务[" + task.getTaskId() + "]?")
+                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                pref.edit().remove(account + ".id").commit();
+                            }
+                        })
+                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                launchTask(task.getId(), true, initDst, initElapse);
+                            }
+                        })
+                        .create()
+                        .show();
+            }
         }
 
         return super.onCreateOptionsMenu(menu);
@@ -665,10 +702,10 @@ public class MainActivity extends AbstractAsyncActivity {
                             btnTaskStart.setVisibility(View.GONE);
                             btnTaskArrive.setVisibility(View.VISIBLE);
 
-                            Toast.makeText(getApplicationContext(),
-                                    "开始出发",
-                                    Toast.LENGTH_SHORT)
-                                    .show();
+//                            Toast.makeText(getApplicationContext(),
+//                                    "开始出发",
+//                                    Toast.LENGTH_SHORT)
+//                                    .show();
                         }
                     })
                     .create()
@@ -697,10 +734,10 @@ public class MainActivity extends AbstractAsyncActivity {
                             btnCamera.setVisibility(View.VISIBLE);
                             btnReport.setVisibility(View.VISIBLE);
 
-                            Toast.makeText(getApplicationContext(),
-                                    "到达目的地",
-                                    Toast.LENGTH_SHORT)
-                                    .show();
+//                            Toast.makeText(getApplicationContext(),
+//                                    "到达目的地",
+//                                    Toast.LENGTH_SHORT)
+//                                    .show();
                         }
                     })
                     .create()
@@ -777,18 +814,16 @@ public class MainActivity extends AbstractAsyncActivity {
                 null);
 
         if (cursor != null) {
-            task = new Task();
-
-            cursor.moveToFirst();
-
-            task.setId(rowid);
-            task.setTaskId(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_TASKID)));
-            task.setPointx(cursor.getDouble(cursor.getColumnIndexOrThrow(TaskTable.COL_POINTX)));
-            task.setPointy(cursor.getDouble(cursor.getColumnIndexOrThrow(TaskTable.COL_POINTY)));
-            task.setKssj(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_KSSJ)));
-            task.setDxcsj(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_DXCSJ)));
-            task.setTaskZt(cursor.getInt(cursor.getColumnIndexOrThrow(TaskTable.COL_TASKZT)));
-
+            if(cursor.moveToFirst()) {
+                task = new Task();
+                task.setId(rowid);
+                task.setTaskId(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_TASKID)));
+                task.setPointx(cursor.getDouble(cursor.getColumnIndexOrThrow(TaskTable.COL_POINTX)));
+                task.setPointy(cursor.getDouble(cursor.getColumnIndexOrThrow(TaskTable.COL_POINTY)));
+                task.setKssj(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_KSSJ)));
+                task.setDxcsj(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_DXCSJ)));
+                task.setTaskZt(cursor.getInt(cursor.getColumnIndexOrThrow(TaskTable.COL_TASKZT)));
+            }
             cursor.close();
         }
         return task;
@@ -920,7 +955,7 @@ public class MainActivity extends AbstractAsyncActivity {
     }
 
     private Location prevLocation = null;
-    private float distance = 0.0f;
+    private float mDistance = 0.0f;
     private long preTime;
     private void handleLocationAtTaskMode(Location location) {
 
@@ -928,7 +963,7 @@ public class MainActivity extends AbstractAsyncActivity {
 
             if(prevLocation != null) {
                 double gap = location.distanceTo(prevLocation);
-                distance += gap;
+                mDistance += gap;
 
                 if(gap >= 1) {
                     long curTime = System.currentTimeMillis();
@@ -953,13 +988,12 @@ public class MainActivity extends AbstractAsyncActivity {
                 }
             } else {
                 addPosition(location);
-                distance = 0.0f;
                 preTime = System.currentTimeMillis();
             }
 
             prevLocation = location;
 
-            distanceField.setText(String.valueOf(Util.round(distance/1000, 1, BigDecimal.ROUND_HALF_UP)));
+            distanceField.setText(String.valueOf(Util.round(mDistance /1000, 1, BigDecimal.ROUND_HALF_UP)));
             if(location.hasSpeed()) {
                 double currentSpeed = Util.round(location.getSpeed(),3,BigDecimal.ROUND_HALF_UP);
                 double kmphSpeed =Util.round((currentSpeed*3.6),2,BigDecimal.ROUND_HALF_UP);

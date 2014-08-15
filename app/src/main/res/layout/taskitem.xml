@@ -94,6 +94,13 @@
                     android:text="执行"
                     android:textSize="12dip"/>
             <Button
+                    android:id="@+id/t_continue"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="1"
+                    android:text="继续"
+                    android:textSize="12dip"/>
+            <Button
                     android:id="@+id/t_photo"
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"

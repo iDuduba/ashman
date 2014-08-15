@@ -57,7 +57,7 @@ public class TaskActivity extends AbstractAsyncListActivity implements LoaderMan
                 this,
                 TaskContentProvider.CONTENT_URI,
                 TaskTable.COLUMNS,
-                TaskTable.COL_TASKZT + "=" + TaskTable.TASK_NEW,
+                TaskTable.COL_CQRY + "=" + getApplicationContext().getAccount() + " and " + TaskTable.COL_TASKZT + "=" + TaskTable.TASK_NEW,
                 null,
                 TaskTable.COL_JJSJ + " desc");
 
@@ -123,17 +123,23 @@ public class TaskActivity extends AbstractAsyncListActivity implements LoaderMan
         startActivity(i);
     }
 
-    private boolean bNew = true;
+    private int currentList = TaskTable.TASK_NEW;
     public void onNewList(View v) {
-        if(!bNew) {
-            mAdapter.getFilter().filter(TaskTable.COL_TASKZT + "=" + TaskTable.TASK_NEW);
-            bNew = !bNew;
+        if(currentList != TaskTable.TASK_NEW) {
+            mAdapter.getFilter().filter(TaskTable.COL_CQRY + "=" + getApplicationContext().getAccount() + " and " + TaskTable.COL_TASKZT + "=" + TaskTable.TASK_NEW);
+            currentList = TaskTable.TASK_NEW;
         }
     }
-    public void onOldList(View v) {
-        if (bNew) {
-            mAdapter.getFilter().filter(TaskTable.COL_TASKZT + "<>" + TaskTable.TASK_NEW);
-            bNew = !bNew;
+    public void onFinishList(View v) {
+        if (currentList != TaskTable.TASK_FINISH) {
+            mAdapter.getFilter().filter(TaskTable.COL_CQRY + "=" + getApplicationContext().getAccount() + " and " + TaskTable.COL_TASKZT + "=" + TaskTable.TASK_FINISH);
+            currentList = TaskTable.TASK_FINISH;
+        }
+    }
+    public void onUnfinishList(View v) {
+        if (currentList != TaskTable.TASK_START) {
+            mAdapter.getFilter().filter(TaskTable.COL_CQRY + "=" + getApplicationContext().getAccount() + " and " + TaskTable.COL_TASKZT + "=" + TaskTable.TASK_START + " or " + TaskTable.COL_TASKZT + "=" + TaskTable.TASK_ARRIVE);
+            currentList = TaskTable.TASK_START;
         }
     }
 
@@ -251,19 +257,27 @@ public class TaskActivity extends AbstractAsyncListActivity implements LoaderMan
             final String rowId = cursor.getString(idColumnIndex);
             int taskIdColumnIndex = cursor.getColumnIndex(TaskTable.COL_TASKID);
             final String taskId = cursor.getString(taskIdColumnIndex);
+            int statusColumnIndex = cursor.getColumnIndex(TaskTable.COL_TASKZT);
+            final int taskStatus = cursor.getInt(statusColumnIndex);
 
-            Button btnRun = (Button) view.findViewById(R.id.t_run);
-            btnRun.setOnClickListener(new View.OnClickListener() {
+            View.OnClickListener lsn = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Map event = new HashMap<String, String>();
                     event.put("type", "task");
                     event.put("id", rowId);
+                    event.put("status", String.valueOf(taskStatus));
                     EventBus.getDefault().post(event);
 
                     finish();
                 }
-            });
+            };
+
+            Button btnRun = (Button) view.findViewById(R.id.t_run);
+            btnRun.setOnClickListener(lsn);
+            Button btnContinue = (Button) view.findViewById(R.id.t_continue);
+            btnContinue.setOnClickListener(lsn);
+
             Button btnPhoto = (Button) view.findViewById(R.id.t_photo);
             btnPhoto.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -293,19 +307,25 @@ public class TaskActivity extends AbstractAsyncListActivity implements LoaderMan
                 }
             });
 
-            int statusColumnIndex = cursor.getColumnIndex(TaskTable.COL_TASKZT);
-            int taskStatus = cursor.getInt(statusColumnIndex);
 
             if(taskStatus == TaskTable.TASK_NEW) {
                 btnRun.setVisibility(View.VISIBLE);
+                btnContinue.setVisibility(View.GONE);
                 btnPhoto.setVisibility(view.GONE);
                 btnReport.setVisibility(view.GONE);
                 btnPath.setVisibility(view.GONE);
-            } else {
+            } else if(taskStatus == TaskTable.TASK_FINISH) {
                 btnRun.setVisibility(View.GONE);
+                btnContinue.setVisibility(View.GONE);
                 btnPhoto.setVisibility(view.VISIBLE);
                 btnReport.setVisibility(view.VISIBLE);
                 btnPath.setVisibility(view.VISIBLE);
+            } else {
+                btnRun.setVisibility(View.GONE);
+                btnContinue.setVisibility(View.VISIBLE);
+                btnPhoto.setVisibility(view.GONE);
+                btnReport.setVisibility(view.GONE);
+                btnPath.setVisibility(view.GONE);
             }
 
 
@@ -353,8 +373,10 @@ public class TaskActivity extends AbstractAsyncListActivity implements LoaderMan
                 int taskZt = cursor.getInt(columnIndex);
                 if (taskZt == TaskTable.TASK_NEW) {
                     ((ImageView)view).setImageResource(R.drawable.task_new);
-                } else {
+                } else if (taskZt == TaskTable.TASK_FINISH) {
                     ((ImageView)view).setImageResource(R.drawable.task_finish);
+                } else  {
+                    ((ImageView)view).setImageResource(R.drawable.task_cancel);
                 }
                 return true;
             }

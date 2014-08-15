@@ -26,6 +26,7 @@ public class MainApplication extends FrontiaApplication {
     private RestTemplate restTemplate;
     private String token;
     private String account;
+    private String userName;
 
     @Override
     public void onCreate() {
@@ -94,6 +95,14 @@ public class MainApplication extends FrontiaApplication {
     }
     public String getAccount() {
         return account;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public static Context getContext() {

@@ -89,6 +89,7 @@ public class LoginActivity extends AbstractAsyncActivity {
         } else {
             getApplicationContext().setToken(response.getToken());
             getApplicationContext().setAccount(user.getText().toString());
+            getApplicationContext().setUserName(response.getXm());
 
             Intent i = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(i);

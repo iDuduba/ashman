@@ -17,9 +17,30 @@
             android:layout_width="fill_parent"
             android:layout_above="@id/runtime"/>
 
+    <LinearLayout
+            android:id="@+id/userInfo"
+            android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginTop="?android:attr/actionBarSize"
+            android:background="#bb666666">
+        <TextView
+                android:id="@+id/jobNumber"
+                android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:gravity="center_horizontal"
+                android:layout_weight="1"/>
+        <TextView
+                android:id="@+id/userName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:layout_weight="1"/>
+    </LinearLayout>
+
     <Button android:layout_width="64dp"
             android:layout_height="64dp"
-            android:layout_marginTop="?android:attr/actionBarSize"
+            android:layout_below="@id/userInfo"
+            android:layout_marginTop="5dp"
             android:layout_marginLeft="5dp"
             android:onClick="onSwitchMode"
             android:text="L"/>
@@ -27,7 +48,8 @@
     <Button android:id="@+id/take_photo"
             android:layout_width="64dp"
             android:layout_height="64dp"
-            android:layout_marginTop="?android:attr/actionBarSize"
+            android:layout_below="@id/userInfo"
+            android:layout_marginTop="5dp"
             android:layout_alignParentRight="true"
             android:layout_marginRight="5dp"
             android:onClick="onCameraClick"

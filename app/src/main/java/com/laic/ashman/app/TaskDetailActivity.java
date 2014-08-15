@@ -158,34 +158,34 @@ public class TaskDetailActivity extends Activity {
         String[] projection = TaskTable.COLUMNS;
         Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
 
-        if (cursor.getCount() > 0) {
-            cursor.moveToFirst();
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                id = cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_ID));
 
-            id = cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_ID));
-
-            mTaskidTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_TASKID)));
-            mTaskztTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_TASKZT)));
-            mSjjssjTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_SJJSSJ)));
-            mKssjTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_KSSJ)));
-            mDxcsjTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_DXCSJ)));
-            mJssjTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_JSSJ)));
-            mEventidTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_EVENTID)));
-            mSjmsTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_SJMS)));
-            mSjlxTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_SJLX)));
-            mJjsjTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_JJSJ)));
-            mDsrdhTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_DSRDH)));
-            mSjcphTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_SJCPH)));
-            mSjfxTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_SJFX)));
-            mSjzhTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_SJZH)));
-            mPointxTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_POINTX)));
-            mPointyTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_POINTY)));
-            mCqclTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_CQCL)));
-            mCqryTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_CQRY)));
-            mCqrydhTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_CQRYDH)));
-            mBzTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_BZ)));
+                mTaskidTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_TASKID)));
+                mTaskztTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_TASKZT)));
+                mSjjssjTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_SJJSSJ)));
+                mKssjTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_KSSJ)));
+                mDxcsjTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_DXCSJ)));
+                mJssjTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_JSSJ)));
+                mEventidTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_EVENTID)));
+                mSjmsTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_SJMS)));
+                mSjlxTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_SJLX)));
+                mJjsjTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_JJSJ)));
+                mDsrdhTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_DSRDH)));
+                mSjcphTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_SJCPH)));
+                mSjfxTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_SJFX)));
+                mSjzhTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_SJZH)));
+                mPointxTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_POINTX)));
+                mPointyTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_POINTY)));
+                mCqclTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_CQCL)));
+                mCqryTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_CQRY)));
+                mCqrydhTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_CQRYDH)));
+                mBzTxt.setText(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_BZ)));
+            }
+            // always close the cursor
+            cursor.close();
         }
-        // always close the cursor
-        cursor.close();
     }
 
     private void makeToast() {

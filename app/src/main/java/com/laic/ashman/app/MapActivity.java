@@ -175,18 +175,16 @@ public class MapActivity extends Activity {
                 null);
 
         if (cursor != null) {
-            task = new Task();
-
-            cursor.moveToFirst();
-
-            task.setId(rowid);
-            task.setTaskId(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_TASKID)));
-            task.setPointx(cursor.getDouble(cursor.getColumnIndexOrThrow(TaskTable.COL_POINTX)));
-            task.setPointy(cursor.getDouble(cursor.getColumnIndexOrThrow(TaskTable.COL_POINTY)));
-            task.setKssj(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_KSSJ)));
-            task.setDxcsj(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_DXCSJ)));
-            task.setTaskZt(cursor.getInt(cursor.getColumnIndexOrThrow(TaskTable.COL_TASKZT)));
-
+            if(cursor.moveToFirst()) {
+                task = new Task();
+                task.setId(rowid);
+                task.setTaskId(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_TASKID)));
+                task.setPointx(cursor.getDouble(cursor.getColumnIndexOrThrow(TaskTable.COL_POINTX)));
+                task.setPointy(cursor.getDouble(cursor.getColumnIndexOrThrow(TaskTable.COL_POINTY)));
+                task.setKssj(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_KSSJ)));
+                task.setDxcsj(cursor.getString(cursor.getColumnIndexOrThrow(TaskTable.COL_DXCSJ)));
+                task.setTaskZt(cursor.getInt(cursor.getColumnIndexOrThrow(TaskTable.COL_TASKZT)));
+            }
             cursor.close();
         }
         return task;

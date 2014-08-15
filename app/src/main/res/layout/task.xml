@@ -16,11 +16,17 @@
                 android:layout_height="wrap_content"
                 android:onClick="onNewList"
                 android:layout_weight="1"
+                android:text="新任务"/>
+
+        <Button android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onUnfinishList"
+                android:layout_weight="1"
                 android:text="未完成任务"/>
 
         <Button android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:onClick="onOldList"
+                android:onClick="onFinishList"
                 android:layout_weight="1"
                 android:text="已完成任务"/>
 

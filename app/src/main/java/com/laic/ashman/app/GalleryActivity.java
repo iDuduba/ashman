@@ -80,9 +80,11 @@ public class GalleryActivity extends Activity {
                     null,
                     null);
 
-            if (cursor != null && cursor.moveToFirst()) {
-                short upFlag = cursor.getShort(cursor.getColumnIndexOrThrow(PhotoTable.COL_UPFLAG));
-                thumbnails[i].uploaded = (upFlag == 0 ? false : true);
+            if (cursor != null) {
+                if(cursor.moveToFirst()) {
+                    short upFlag = cursor.getShort(cursor.getColumnIndexOrThrow(PhotoTable.COL_UPFLAG));
+                    thumbnails[i].uploaded = (upFlag == 0 ? false : true);
+                }
                 cursor.close();
             }
         }
