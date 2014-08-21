@@ -69,6 +69,7 @@ public class MapActivity extends Activity {
             public void onStatusChanged(Object source, STATUS status) {
                 if (source == mMap && status == STATUS.INITIALIZED) {
                     gLayer = new GraphicsLayer();
+//                    gLayer.setOpacity(0.1f);
                     mMap.addLayer(gLayer);
 
                     Task task = queryTaskById(Integer.parseInt(mTaskRowId));

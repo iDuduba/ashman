@@ -14,4 +14,9 @@
         <item name="60">60</item>
         <item name="300">300</item>
     </string-array>
+    <string-array name="doveResons">
+        <item>现场没有发现故障车</item>
+        <item>黄牛正在修理不用拖车</item>
+        <item>驾驶员自行修理不用拖</item>
+    </string-array>
 </resources>

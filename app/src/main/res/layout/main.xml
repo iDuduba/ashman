@@ -4,7 +4,7 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
-    <include layout="@layout/rt"
+    <include layout="@layout/runtime"
             android:id="@+id/runtime"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -37,6 +37,29 @@
                 android:layout_weight="1"/>
     </LinearLayout>
 
+    <LinearLayout
+            android:id="@+id/siteAction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_above="@id/runtime"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="5dp">
+
+        <Button android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:onClick="onCameraClick"
+                android:text="拍照"/>
+        <Button android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:onClick="onReportClick"
+                android:text="报告"/>
+        <Button android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:onClick="onStandUpClick"
+                android:text="放空"/>
+    </LinearLayout>
+
     <Button android:layout_width="64dp"
             android:layout_height="64dp"
             android:layout_below="@id/userInfo"
@@ -45,22 +68,14 @@
             android:onClick="onSwitchMode"
             android:text="L"/>
 
-    <Button android:id="@+id/take_photo"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_below="@id/userInfo"
-            android:layout_marginTop="5dp"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="5dp"
-            android:onClick="onCameraClick"
-            android:text="拍照"/>
-    <Button android:id="@+id/take_report"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_below="@id/take_photo"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="5dp"
-            android:onClick="onReportClick"
-            android:text="报告"/>
+
+    <include layout="@layout/loglist"
+             android:id="@+id/loginfo"
+             android:layout_width="fill_parent"
+             android:layout_height="fill_parent"
+             android:scrollbars="vertical"
+             android:layout_above="@id/runtime"
+             android:layout_below="@id/userInfo"
+             android:visibility="gone"/>
 
 </RelativeLayout>

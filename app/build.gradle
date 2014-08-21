@@ -68,7 +68,7 @@ dependencies {
     compile 'org.springframework.android:spring-android-rest-template:1.0.1.RELEASE'
     compile 'com.google.code.gson:gson:2.2.4'
 
-    compile 'joda-time:joda-time:2.3'
+    compile 'joda-time:joda-time:2.4'
     compile 'commons-net:commons-net:3.3'
     compile 'commons-io:commons-io:2.4'
     compile 'commons-codec:commons-codec:1.9'

@@ -183,6 +183,21 @@
     </TableRow>
 
     <TableRow>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:text="救援费用："/>
+        <EditText
+                android:id="@+id/qzsf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:numeric="integer"
+                android:layout_span="3"
+                android:text="0"/>
+    </TableRow>
+
+    <TableRow>
         <Button
                 android:id="@+id/report_save"
                 android:layout_width="wrap_content"

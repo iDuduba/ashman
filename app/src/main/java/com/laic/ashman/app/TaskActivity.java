@@ -464,7 +464,7 @@ public class TaskActivity extends AbstractAsyncListActivity implements LoaderMan
         protected TaskMessage doInBackground(Void... params) {
             Map paras = new HashMap<String, Object>();
 
-            URI targetUrl = getApplicationContext().createGetUrl(Message.ACT_GETTASK, paras);
+            URI targetUrl = getApplicationContext().createGetUrl(Message.ACT_TASKLIST, paras);
 
             try {
                 // Make the network request

@@ -24,6 +24,7 @@ public class ReportTable {
     public static final String COL_DL = "dl";
     public static final String COL_GQ = "gq";
     public static final String COL_CBSHL = "cbshl";
+    public static final String COL_QZSF = "qzsf";
     public static final String COL_UPFLAG = "upflag";
 
     public static final String[] COLUMNS = {
@@ -41,6 +42,7 @@ public class ReportTable {
             COL_GQ,
             COL_CBSHL,
             COL_UPFLAG,
+            COL_QZSF,
             COL_ID
     };
 
@@ -60,6 +62,7 @@ public class ReportTable {
                     COL_DL + " smallint DEFAULT 0," +
                     COL_GQ + " smallint DEFAULT 0," +
                     COL_CBSHL + " smallint DEFAULT 0," +
+                    COL_QZSF + " int DEFAULT 0," +
                     COL_UPFLAG + " smallint DEFAULT 0);";
 
     private static final String SQL_DELETE_TABLE = "DROP TABLE IF EXISTS " + TABLE_NAME;

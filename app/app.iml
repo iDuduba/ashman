@@ -85,8 +85,8 @@
     <orderEntry type="library" exported="" name="spring-android-core-1.0.1.RELEASE" level="project" />
     <orderEntry type="library" exported="" name="commons-codec-1.9" level="project" />
     <orderEntry type="library" exported="" name="arcgis-android-app-toolkit" level="project" />
-    <orderEntry type="library" exported="" name="joda-time-2.3" level="project" />
     <orderEntry type="library" exported="" name="commons-net-3.3" level="project" />
+    <orderEntry type="library" exported="" name="joda-time-2.4" level="project" />
     <orderEntry type="module" module-name="slidelistview" exported="" />
   </component>
 </module>

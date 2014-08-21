@@ -12,6 +12,8 @@ public class TaskTable {
     public static final int TASK_START = 2;
     public static final int TASK_ARRIVE = 3;
     public static final int TASK_FINISH = 4;
+    public static final int TASK_DOVE = 5;  // 被放鸽子:)
+    public static final int TASK_RUNNING = 23;  // 被放鸽子:)
 
     public static final String EXT_TASK_ID = "task_id";
     public static final String EXT_TASK_ROW_ID = "task_row_id";

@@ -28,6 +28,15 @@ public class Task {
     private String cqry;
     private String cqrydh;
     private String bz;
+    private String doveReason;
+
+    public String getDoveReason() {
+        return doveReason;
+    }
+
+    public void setDoveReason(String doveReason) {
+        this.doveReason = doveReason;
+    }
 
     public int getId() {
         return id;

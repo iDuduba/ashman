@@ -55,8 +55,8 @@
             android:theme="@style/CustomActionBarTheme" >
         </activity>
         <activity
-            android:name="com.laic.ashman.app.TaskActivity"
-            android:label="任务列表" />
+                android:name="com.laic.ashman.app.TaskListActivity"
+                android:label="任务列表" />
         <activity
             android:name="com.laic.ashman.app.TaskDetailActivity"
             android:label="任务详情" />
@@ -74,7 +74,7 @@
             android:label="设置" />
 
         <service
-            android:name=".PicUploadService"
+            android:name="com.laic.ashman.app.PicUploadService"
             android:exported="false" />
 
         <provider
@@ -87,8 +87,8 @@
             android:name="com.laic.ashman.app.provider.PositionContentProvider"
             android:authorities="com.laic.ashman.provider.position" />
         <provider
-                android:name="com.laic.ashman.app.provider.PhotoContentProvider"
-                android:authorities="com.laic.ashman.provider.photo" />
+            android:name="com.laic.ashman.app.provider.PhotoContentProvider"
+            android:authorities="com.laic.ashman.provider.photo" />
 
         <!-- push应用定义消息receiver声明 -->
         <receiver android:name="com.laic.ashman.app.BaiduPushMessageReceiver" >

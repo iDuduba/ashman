@@ -21,6 +21,13 @@
 
     <PreferenceCategory android:title="杂项" >
         <CheckBoxPreference
+                android:title="调试模式?"
+                android:summaryOn="调试模式"
+                android:summaryOff="非调试模式"
+                android:defaultValue="false"
+                android:key="@string/setting_debug_mode"/>
+
+        <CheckBoxPreference
                 android:key="@string/setting_record_track"
                 android:title="记录车辆轨迹?"
                 android:summary="Enable or disable data updates"

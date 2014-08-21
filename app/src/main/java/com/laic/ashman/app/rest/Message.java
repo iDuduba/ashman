@@ -11,10 +11,11 @@ public class Message implements Serializable {
     public final static int NETERR = -1000;
 
     public final static String ACT_LOGIN = "login";
-    public final static String ACT_GETTASK = "tasklist";
+    public final static String ACT_TASKLIST = "tasklist";
     public final static String ACT_START = "depart";
     public final static String ACT_ARRIVE = "arrived";
     public final static String ACT_FINISH = "finished";
+    public final static String ACT_DOVE = "emptied";
     public final static String ACT_POSITION = "position";
     public final static String ACT_REPORT = "report";
     public final static String ACT_PHOTO = "uploadImage";

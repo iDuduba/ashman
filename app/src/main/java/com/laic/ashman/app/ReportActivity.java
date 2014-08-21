@@ -40,6 +40,7 @@ public class ReportActivity extends AbstractAsyncActivity {
     private EditText mDlTxt;
     private EditText mGqTxt;
     private EditText mCbshlTxt;
+    private EditText mQzsfTxt;
 
     private Button mSaveBtn;
     private Button mUploadBtn;
@@ -62,6 +63,7 @@ public class ReportActivity extends AbstractAsyncActivity {
         mDlTxt = (EditText) findViewById(R.id.dl);
         mGqTxt = (EditText) findViewById(R.id.gq);
         mCbshlTxt = (EditText) findViewById(R.id.cbshl);
+        mQzsfTxt = (EditText) findViewById(R.id.qzsf);
 
         mSaveBtn = (Button) findViewById(R.id.report_save);
         mUploadBtn = (Button) findViewById(R.id.report_upload);
@@ -91,6 +93,7 @@ public class ReportActivity extends AbstractAsyncActivity {
         report.setDl(Integer.valueOf(mDlTxt.getText().toString()));
         report.setGq(Integer.valueOf(mGqTxt.getText().toString()));
         report.setCbshl(Integer.valueOf(mCbshlTxt.getText().toString()));
+        report.setQzsf(Integer.valueOf(mQzsfTxt.getText().toString()));
 
         ContentValues values = new ContentValues();
 
@@ -106,6 +109,7 @@ public class ReportActivity extends AbstractAsyncActivity {
         values.put(ReportTable.COL_DL, report.getDl());
         values.put(ReportTable.COL_GQ, report.getGq());
         values.put(ReportTable.COL_CBSHL, report.getCbshl());
+        values.put(ReportTable.COL_QZSF, report.getQzsf());
         values.put(ReportTable.COL_TASKID, report.getTaskId());
 
         getContentResolver().insert(ReportContentProvider.CONTENT_URI, values);
@@ -144,6 +148,7 @@ public class ReportActivity extends AbstractAsyncActivity {
                 report.setDl(cursor.getShort(cursor.getColumnIndexOrThrow(ReportTable.COL_DL)));
                 report.setGq(cursor.getShort(cursor.getColumnIndexOrThrow(ReportTable.COL_GQ)));
                 report.setCbshl(cursor.getShort(cursor.getColumnIndexOrThrow(ReportTable.COL_CBSHL)));
+                report.setQzsf(cursor.getShort(cursor.getColumnIndexOrThrow(ReportTable.COL_QZSF)));
                 report.setUpflag(cursor.getShort(cursor.getColumnIndexOrThrow(ReportTable.COL_UPFLAG)));
 
                 mLzTxt.setText(String.valueOf(report.getLz()));
@@ -158,6 +163,7 @@ public class ReportActivity extends AbstractAsyncActivity {
                 mDlTxt.setText(String.valueOf(report.getDl()));
                 mGqTxt.setText(String.valueOf(report.getGq()));
                 mCbshlTxt.setText(String.valueOf(report.getCbshl()));
+                mQzsfTxt.setText(String.valueOf(report.getQzsf()));
 
                 mSaveBtn.setEnabled(false);
 
@@ -213,6 +219,7 @@ public class ReportActivity extends AbstractAsyncActivity {
             paras.put(ReportTable.COL_LH, report.getLh());
             paras.put(ReportTable.COL_LZ, report.getLz());
             paras.put(ReportTable.COL_SM, report.getSm());
+            paras.put(ReportTable.COL_QZSF, report.getQzsf());
 
             URI targetUrl = getApplicationContext().createGetUrl(Message.ACT_REPORT, paras);
 

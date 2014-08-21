@@ -33,6 +33,7 @@ import com.laic.ashman.app.bo.Task;
 import com.laic.ashman.app.provider.*;
 import com.laic.ashman.app.rest.Message;
 import de.greenrobot.event.EventBus;
+import org.joda.time.DateTime;
 import org.springframework.web.client.RestClientException;
 
 import java.io.File;
@@ -60,8 +61,7 @@ public class MainActivity extends AbstractAsyncActivity {
     private Button btnTaskArrive;
     private Button btnTaskFinish;
 
-    private Button btnCamera;
-    private Button btnReport;
+    private View cSiteAction;
 
     private TextView txtJobNumber;
     private TextView txtUserName;
@@ -83,6 +83,13 @@ public class MainActivity extends AbstractAsyncActivity {
     boolean isTrack = true;
     int updateInterval = 1000000;
 
+
+    // ----- Debug Begin --------
+    private boolean isDebugMode = false;
+    private View logSection;
+    private ArrayAdapter<String> logAdapter;
+    // ----- Debug End -----
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -102,12 +109,6 @@ public class MainActivity extends AbstractAsyncActivity {
         //设置窗口特征：启用不显示进度的进度条
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        isTrack = settings.getBoolean(getString(R.string.setting_record_track), true);
-        if(isTrack) {
-            updateInterval = Integer.valueOf(
-                    settings.getString(getString(R.string.setting_gps_update_interval), "1000000")) * 1000;
-        }
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -143,10 +144,8 @@ public class MainActivity extends AbstractAsyncActivity {
         btnTaskArrive = (Button) findViewById(R.id.btnTaskArrive);
         btnTaskFinish = (Button) findViewById(R.id.btnTaskFinish);
 
-        btnCamera = (Button) findViewById(R.id.take_photo);
-        btnCamera.setVisibility(View.INVISIBLE);
-        btnReport = (Button) findViewById(R.id.take_report);
-        btnReport.setVisibility(View.INVISIBLE);
+        cSiteAction = findViewById(R.id.siteAction);
+        cSiteAction.setVisibility(View.INVISIBLE);
 
         txtJobNumber = (TextView) findViewById(R.id.jobNumber);
         txtJobNumber.setText(getApplicationContext().getAccount());
@@ -158,12 +157,37 @@ public class MainActivity extends AbstractAsyncActivity {
 //        View taskLayout = getLayoutInflater().inflate(R.layout.info, null);
 
         EventBus.getDefault().register(this);
+
+
+        logSection = findViewById(R.id.loginfo);
+        ListView logList = (ListView) findViewById(R.id.loglist);
+        logAdapter = new ArrayAdapter<String>(this, R.layout.logrow);
+        logList.setAdapter(logAdapter);
+
+        findViewById(R.id.clearlog).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logAdapter.clear();
+            }
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         Log.d(DEBUG_TAG, "onResume");
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        isTrack = settings.getBoolean(getString(R.string.setting_record_track), true);
+        if(isTrack) {
+            updateInterval = Integer.valueOf(
+                    settings.getString(getString(R.string.setting_gps_update_interval), "1000000")) * 1000;
+        }
+
+        isDebugMode = settings.getBoolean(getString(R.string.setting_debug_mode), false);
+        if(!isDebugMode) {
+            logSection.setVisibility(View.GONE);
+        }
 
         mMapView.unpause();
 
@@ -254,8 +278,10 @@ public class MainActivity extends AbstractAsyncActivity {
                     btnTaskArrive.setVisibility(View.GONE);
                     btnTaskFinish.setVisibility(View.VISIBLE);
 
-                    btnCamera.setVisibility(View.VISIBLE);
-                    btnReport.setVisibility(View.VISIBLE);
+                    cSiteAction.setVisibility(View.VISIBLE);
+//                    btnCamera.setVisibility(View.VISIBLE);
+//                    btnReport.setVisibility(View.VISIBLE);
+//                    btnDove.setVisibility(View.VISIBLE);
                     break;
             }
 
@@ -383,24 +409,36 @@ public class MainActivity extends AbstractAsyncActivity {
             case R.id.action_cancel_task:
                 cancelTask();
                 return true;
+            case R.id.action_open_loglist:
+                if(isDebugMode) {
+                    if(logSection.getVisibility() == View.GONE) {
+                        logSection.setVisibility(View.VISIBLE);
+                    } else {
+                        logSection.setVisibility(View.GONE);
+                    }
+                }
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
     private void openTaskList() {
-        Intent i = new Intent(this, TaskActivity.class);
+        Intent i = new Intent(this, TaskListActivity.class);
         startActivity(i);
     }
 
     private void cancelTask() {
-        currentTask = null;
+        if(currentTask.isStarted()) {
+            elapseField.stop();
+        }
 
-        btnCamera.setVisibility(View.INVISIBLE);
-        btnReport.setVisibility(View.INVISIBLE);
+        cSiteAction.setVisibility(View.INVISIBLE);
 
         taskSection.setVisibility(View.GONE);
         gLayer.removeAll();
+
+        currentTask = null;
     }
 
 
@@ -520,49 +558,31 @@ public class MainActivity extends AbstractAsyncActivity {
         sendBroadcast(mediaScanIntent);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-    /*
-    invoke the system's media scanner to add your photo to the Media Provider's database,
-    making it available in the Android Gallery application and to other apps.
-     */
-    private void galleryAddPic() {
-        Log.d(DEBUG_TAG, "add to gallery : " + mCurrentPhotoPath);
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-//        File f = new File("file:" + mCurrentPhotoPath);
-        Uri contentUri = Uri.parse("file://" + mCurrentPhotoPath);
-        mediaScanIntent.setData(contentUri);
-        sendBroadcast(mediaScanIntent);
-    }
+        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK) {
 
+            addPhotoToGallery();
 
-    /**
-     * Scale the photo down and fit it to our image views.
-     *
-     * "Drastically increases performance" to set images using this technique.
-     * Read more:http://developer.android.com/training/camera/photobasics.html
-     */
-    private void setFullImageFromFilePath(String imagePath, ImageView imageView) {
-        // Get the dimensions of the View
-        int targetW = imageView.getWidth();
-        int targetH = imageView.getHeight();
+            ContentValues values = new ContentValues();
+            values.put(PhotoTable.COL_TASKID, currentTask.getTaskId());
+            values.put(PhotoTable.COL_NAME, getCurrentPhotoPath());
+            getContentResolver().insert(PhotoContentProvider.CONTENT_URI, values);
 
-        // Get the dimensions of the bitmap
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(imagePath, bmOptions);
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
+            // Show the full sized image.
+//            setFullImageFromFilePath(getCurrentPhotoPath(), mThumbnailImageView);
 
-        // Determine how much to scale down the image
-        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+            PicUploadService.startActionUpload(
+                    getApplicationContext(),
+                    getCurrentPhotoPath(),
+                    currentTask.getTaskId());
 
-        // Decode the image file into a Bitmap sized to fill the View
-        bmOptions.inJustDecodeBounds = false;
-        bmOptions.inSampleSize = scaleFactor;
-        bmOptions.inPurgeable = true;
-
-        Bitmap bitmap = BitmapFactory.decodeFile(imagePath, bmOptions);
-        imageView.setImageBitmap(bitmap);
+//            Toast.makeText(getApplicationContext(),
+//                    getCurrentPhotoPath(),
+//                    Toast.LENGTH_SHORT)
+//                    .show();
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -668,6 +688,11 @@ public class MainActivity extends AbstractAsyncActivity {
                 values.put(TaskTable.COL_JSSJ, current);
                 method = Message.ACT_FINISH;
                 break;
+            case TaskTable.TASK_DOVE:
+                values.put(TaskTable.COL_JSSJ, current);
+                method = Message.ACT_DOVE;
+                currentTask.setTaskZt(TaskTable.TASK_FINISH);
+                break;
         }
 
         values.put(TaskTable.COL_TASKZT, currentTask.getTaskZt());
@@ -680,6 +705,9 @@ public class MainActivity extends AbstractAsyncActivity {
 
         Map paras = new HashMap<String, Object>();
         paras.put("taskId", currentTask.getTaskId());
+        if(method == Message.ACT_DOVE) {
+            paras.put("fkyy", currentTask.getDoveReason());
+        }
         new FetchResourceTask(method, paras).execute();
     }
 
@@ -687,9 +715,9 @@ public class MainActivity extends AbstractAsyncActivity {
         if(currentTask != null && currentTask.isNewTask()) {
             new AlertDialog.Builder(this)
                     .setTitle("提示")
-                    .setMessage("确定出发？")
-                    .setNegativeButton("取消", null)
-                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    .setMessage("是否出发？")
+                    .setNegativeButton("再等等", null)
+                    .setPositiveButton("前进", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             switchOnFollowMode();
@@ -701,11 +729,6 @@ public class MainActivity extends AbstractAsyncActivity {
 
                             btnTaskStart.setVisibility(View.GONE);
                             btnTaskArrive.setVisibility(View.VISIBLE);
-
-//                            Toast.makeText(getApplicationContext(),
-//                                    "开始出发",
-//                                    Toast.LENGTH_SHORT)
-//                                    .show();
                         }
                     })
                     .create()
@@ -718,9 +741,9 @@ public class MainActivity extends AbstractAsyncActivity {
 
             new AlertDialog.Builder(this)
                     .setTitle("提示")
-                    .setMessage("确定到达现场？")
-                    .setNegativeButton("取消", null)
-                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    .setMessage("这就到了？")
+                    .setNegativeButton("继续前进", null)
+                    .setPositiveButton("到了", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             updateTaskStatus(TaskTable.TASK_ARRIVE);
@@ -731,13 +754,7 @@ public class MainActivity extends AbstractAsyncActivity {
                             btnTaskArrive.setVisibility(View.GONE);
                             btnTaskFinish.setVisibility(View.VISIBLE);
 
-                            btnCamera.setVisibility(View.VISIBLE);
-                            btnReport.setVisibility(View.VISIBLE);
-
-//                            Toast.makeText(getApplicationContext(),
-//                                    "到达目的地",
-//                                    Toast.LENGTH_SHORT)
-//                                    .show();
+                            cSiteAction.setVisibility(View.VISIBLE);
                         }
                     })
                     .create()
@@ -749,9 +766,9 @@ public class MainActivity extends AbstractAsyncActivity {
         if(currentTask != null && currentTask.isArrived()) {
             new AlertDialog.Builder(this)
                     .setTitle("提示")
-                    .setMessage("确定任务已经完成？")
-                    .setNegativeButton("取消", null)
-                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    .setMessage("打扫干净，收工回家？")
+                    .setNegativeButton("没完", null)
+                    .setPositiveButton("是的", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
 
@@ -760,10 +777,46 @@ public class MainActivity extends AbstractAsyncActivity {
                             btnTaskFinish.setVisibility(View.GONE);
                             taskSection.setVisibility(View.GONE);
 
-                            btnCamera.setVisibility(View.INVISIBLE);
-                            btnReport.setVisibility(View.INVISIBLE);
+                            cSiteAction.setVisibility(View.INVISIBLE);
+
+                            currentTask = null;
                         }
                     })
+                    .create()
+                    .show();
+        }
+    }
+
+    private int doveReson;
+    public void onStandUpClick(View view) {
+        if(currentTask != null && currentTask.isArrived()) {
+            doveReson = 0;
+            new AlertDialog.Builder(this)
+                    .setTitle("被放鸽子了？")
+                    .setSingleChoiceItems(R.array.doveResons, 0, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int item) {
+                            doveReson = item;
+                        }
+                    })
+                    .setPositiveButton("是的", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String[] resons = getResources().getStringArray(R.array.doveResons);
+                            if (doveReson >= 0) {
+                                currentTask.setDoveReason(resons[doveReson]);
+                                updateTaskStatus(TaskTable.TASK_DOVE);
+
+                                btnTaskFinish.setVisibility(View.GONE);
+                                taskSection.setVisibility(View.GONE);
+
+                                cSiteAction.setVisibility(View.INVISIBLE);
+
+                                currentTask = null;
+                            }
+                        }
+                    })
+                    .setNegativeButton("按错了", null)
                     .create()
                     .show();
         }
@@ -829,43 +882,6 @@ public class MainActivity extends AbstractAsyncActivity {
         return task;
     }
 
-    class Ha extends ArcGISTiledMapServiceLayer {
-
-        public Ha(String url) {
-            super(url);
-        }
-
-        public Ha(String url, UserCredentials credentials) {
-            super(url, credentials);
-        }
-
-        public Ha(String url, UserCredentials credentials, boolean initLayer) {
-            super(url, credentials, initLayer);
-        }
-
-        @Override
-        protected void initLayer() {
-//            DisplayMetrics dm = new DisplayMetrics();
-//            dm = getResources().getDisplayMetrics();
-//            dm.densityDpi,
-
-            TileInfo ti = getTileInfo();
-            TileInfo tin = new TileInfo(
-                    ti.getOrigin(),
-                    ti.getScales(),
-                    ti.getResolutions(),
-                    ti.getLevels(),
-//                    ti.getDPI(),
-                    320,
-                    ti.getTileWidth(),
-                    ti.getTileHeight());
-
-            setTileInfo(tin);
-
-            super.initLayer();
-        }
-    }
-
     private char panMode = 'L';
     public void onSwitchMode(View v) {
         mMapView.setRotationAngle(0);
@@ -910,7 +926,6 @@ public class MainActivity extends AbstractAsyncActivity {
         gLayer = new GraphicsLayer();
         // Add empty GraphicsLayer
         mMapView.addLayer(gLayer);
-        Log.d(DEBUG_TAG, "add gLayer");
 
 
         // debug
@@ -956,7 +971,7 @@ public class MainActivity extends AbstractAsyncActivity {
 
     private Location prevLocation = null;
     private float mDistance = 0.0f;
-    private long preTime;
+    private long preTime = System.currentTimeMillis();
     private void handleLocationAtTaskMode(Location location) {
 
         if(isBetterLocation(location, prevLocation) == true) {
@@ -967,9 +982,20 @@ public class MainActivity extends AbstractAsyncActivity {
 
                 if(gap >= 1) {
                     long curTime = System.currentTimeMillis();
+                    if(isDebugMode) {
+                        StringBuffer sb = new StringBuffer(new DateTime(curTime).toString("HH:mm:ss.SSS --> "));
+                        sb.append(curTime - preTime).append(" ? ").append(updateInterval);
+                        logAdapter.add(sb.toString());
+                        logAdapter.notifyDataSetChanged();
+                    }
                     if(curTime - preTime >= updateInterval) {
                         addPosition(location);
                         preTime = curTime;
+
+                        if(isDebugMode) {
+                            logAdapter.add("-> " + location.getLongitude() + " : " + location.getLatitude());
+                            logAdapter.notifyDataSetChanged();
+                        }
                     }
 
                     Point bPoint = GeometryEngine.project(prevLocation.getLongitude(), prevLocation.getLatitude(), mMapView.getSpatialReference());
@@ -1077,33 +1103,6 @@ public class MainActivity extends AbstractAsyncActivity {
         paras.put(TaskTable.COL_POINTX, loc.getLongitude());
         paras.put(TaskTable.COL_POINTY, loc.getLatitude());
         new FetchResourceTask(Message.ACT_POSITION, paras).execute();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK) {
-
-            addPhotoToGallery();
-
-            ContentValues values = new ContentValues();
-            values.put(PhotoTable.COL_TASKID, currentTask.getTaskId());
-            values.put(PhotoTable.COL_NAME, getCurrentPhotoPath());
-            getContentResolver().insert(PhotoContentProvider.CONTENT_URI, values);
-
-            // Show the full sized image.
-//            setFullImageFromFilePath(getCurrentPhotoPath(), mThumbnailImageView);
-
-            PicUploadService.startActionUpload(
-                    getApplicationContext(),
-                    getCurrentPhotoPath(),
-                    currentTask.getTaskId());
-
-//            Toast.makeText(getApplicationContext(),
-//                    getCurrentPhotoPath(),
-//                    Toast.LENGTH_SHORT)
-//                    .show();
-        }
     }
 
     private static final int TWO_MINUTES = 1000 * 60 * 2;

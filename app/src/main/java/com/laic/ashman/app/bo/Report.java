@@ -20,6 +20,16 @@ public class Report {
     private int dl;
     private int gq;
     private int cbshl;
+    private int qzsf;
+
+    public int getQzsf() {
+        return qzsf;
+    }
+
+    public void setQzsf(int qzsf) {
+        this.qzsf = qzsf;
+    }
+
     private int upflag = 0;
 
     public int getUpflag() {
