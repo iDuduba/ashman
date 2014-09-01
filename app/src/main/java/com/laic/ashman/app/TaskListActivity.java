@@ -5,9 +5,11 @@ import android.app.AlertDialog;
 import android.app.FragmentTransaction;
 import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -44,6 +46,10 @@ public class TaskListActivity extends AbstractAsyncFragmentActivity implements A
         super.onCreate(savedInstanceState);
         setContentView(R.layout.tasklist);
 
+        new FetchResourceTask().execute();
+    }
+
+    private void showViewPager() {
         mPagerAdapter = new TaskPagerAdapter(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setOnPageChangeListener(
@@ -90,8 +96,14 @@ public class TaskListActivity extends AbstractAsyncFragmentActivity implements A
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu items for use in the action bar
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.task_activity_actions, menu);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean isDebugMode = settings.getBoolean(getString(R.string.setting_debug_mode), false);
+
+        if(isDebugMode) {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.task_activity_actions, menu);
+        }
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -141,7 +153,7 @@ public class TaskListActivity extends AbstractAsyncFragmentActivity implements A
 
         @Override
         public int getCount() {
-            return 3;
+            return tabs.length;
         }
 
         @Override
@@ -206,6 +218,9 @@ public class TaskListActivity extends AbstractAsyncFragmentActivity implements A
 
             String[] projection = new String[] {TaskTable.COL_ID};
 
+            int newTasks = 0;
+            int oldTasks = 0;
+
             for(Task task : response.getData()) {
                 ContentValues values = new ContentValues();
 
@@ -238,14 +253,17 @@ public class TaskListActivity extends AbstractAsyncFragmentActivity implements A
                         null);
 
                 boolean addFlag = true;
-                if (cursor.getCount() > 0) {
-                    addFlag = false;
+                if(cursor != null) {
+                    if (cursor.getCount() > 0) {
+                        addFlag = false;
+                    }
+                    cursor.close();
                 }
-                cursor.close();
 
                 if(addFlag) {
 //                    Log.d(DEBUG_TAG, "A -> " + task.getTaskId());
                     getContentResolver().insert(TaskContentProvider.CONTENT_URI, values);
+                    newTasks++;
                 } else {
 //                    Log.d(DEBUG_TAG, "U -> " + task.getTaskId());
                     getContentResolver().update(
@@ -253,15 +271,22 @@ public class TaskListActivity extends AbstractAsyncFragmentActivity implements A
                             values,
                             TaskTable.COL_TASKID + "=?",
                             new String[] {task.getTaskId()});
+                    oldTasks++;
                 }
             }
 
 //            getLoaderManager().restartLoader(0, null, this);
 
-            String msg = "共下载 " + response.getTotal() + " 项任务.";
+            String msg = "共下载" + response.getTotal() + "项任务, 新增" + newTasks + ", 更新" + oldTasks;
             Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
         }
+
+        if(init == true) {
+            showViewPager();
+            init = false;
+        }
     }
+    private boolean init = true;
 
     class FetchResourceTask extends AsyncTask<Void, Void, TaskMessage> {
 

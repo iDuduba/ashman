@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -41,12 +43,13 @@ public class TaskDetailActivity extends Activity {
     private TextView mSjcphTxt;
     private TextView mSjfxTxt;
     private TextView mSjzhTxt;
-    private EditText mPointxTxt;
-    private EditText mPointyTxt;
+    private TextView mPointxTxt;
+    private TextView mPointyTxt;
     private TextView mCqclTxt;
     private TextView mCqryTxt;
     private TextView mCqrydhTxt;
     private TextView mBzTxt;
+    private Button mUpdateBtn;
 
     private Uri taskUri;
 
@@ -68,12 +71,13 @@ public class TaskDetailActivity extends Activity {
         mSjcphTxt = (TextView) findViewById(R.id.sjcph);
         mSjfxTxt = (TextView) findViewById(R.id.sjfx);
         mSjzhTxt = (TextView) findViewById(R.id.sjzh);
-        mPointxTxt = (EditText) findViewById(R.id.pointx);
-        mPointyTxt = (EditText) findViewById(R.id.pointy);
+        mPointxTxt = (TextView) findViewById(R.id.pointx);
+        mPointyTxt = (TextView) findViewById(R.id.pointy);
         mCqclTxt = (TextView) findViewById(R.id.cqcl);
         mCqryTxt = (TextView) findViewById(R.id.cqry);
         mCqrydhTxt = (TextView) findViewById(R.id.cqrydh);
         mBzTxt = (TextView) findViewById(R.id.bz);
+        mUpdateBtn = (Button) findViewById(R.id.task_update);
 
         Bundle extras = getIntent().getExtras();
 
@@ -92,6 +96,24 @@ public class TaskDetailActivity extends Activity {
         PhoneCallListener phoneListener = new PhoneCallListener();
         TelephonyManager telephonyManager = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
         telephonyManager.listen(phoneListener,PhoneStateListener.LISTEN_CALL_STATE);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean isDebugMode = settings.getBoolean(getString(R.string.setting_debug_mode), false);
+
+        if(isDebugMode) {
+            mTaskztTxt.setEnabled(true);
+            mTaskztTxt.setFocusable(true);
+            mUpdateBtn.setVisibility(View.VISIBLE);
+        } else {
+            mTaskztTxt.setEnabled(false);
+            mTaskztTxt.setFocusable(false);
+            mUpdateBtn.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -132,15 +154,15 @@ public class TaskDetailActivity extends Activity {
     }
 
     private void saveState() {
-        String longitude = mPointxTxt.getText().toString();
-        String latitude = mPointyTxt.getText().toString();
+//        String longitude = mPointxTxt.getText().toString();
+//        String latitude = mPointyTxt.getText().toString();
         String status = mTaskztTxt.getText().toString();
 
         ContentValues values = new ContentValues();
 
         values.put(TaskTable.COL_ID, id);
-        values.put(TaskTable.COL_POINTX, longitude);
-        values.put(TaskTable.COL_POINTY, latitude);
+//        values.put(TaskTable.COL_POINTX, longitude);
+//        values.put(TaskTable.COL_POINTY, latitude);
         values.put(TaskTable.COL_TASKZT, status);
 
         getContentResolver().update(taskUri, values, null, null);
