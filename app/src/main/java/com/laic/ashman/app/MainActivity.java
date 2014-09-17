@@ -37,6 +37,8 @@ import org.joda.time.DateTime;
 import org.springframework.web.client.RestClientException;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
@@ -65,6 +67,7 @@ public class MainActivity extends AbstractAsyncActivity {
 
     private TextView txtJobNumber;
     private TextView txtUserName;
+    private ImageView imgAvator;
 
     MapView mMapView;
     private LocationDisplayManager mLocService = null;
@@ -89,6 +92,8 @@ public class MainActivity extends AbstractAsyncActivity {
     private View logSection;
     private ArrayAdapter<String> logAdapter;
     // ----- Debug End -----
+
+    SharedPreferences settings;
 
     @Override
     protected void onStart() {
@@ -122,6 +127,8 @@ public class MainActivity extends AbstractAsyncActivity {
 
         ArcGISRuntime.setClientId("MwOHwL7ofpZsYhB5");
 
+        settings = PreferenceManager.getDefaultSharedPreferences(this);
+
         // Retrieve the map and initial extent from XML layout
         mMapView = (MapView)findViewById(R.id.map);
         // enable map to wrap around date line
@@ -152,6 +159,24 @@ public class MainActivity extends AbstractAsyncActivity {
         txtUserName = (TextView) findViewById(R.id.userName);
         txtUserName.setText(getApplicationContext().getUserName());
 
+        imgAvator = (ImageView) findViewById(R.id.avator);
+
+        FileInputStream in = null;
+        try {
+            in =  openFileInput(settings.getString(getString(R.string.setting_recent_user), "") + ".png");
+            imgAvator.setImageBitmap(BitmapFactory.decodeStream(in));
+        } catch (FileNotFoundException e) {
+            Log.w(TAG, e.getLocalizedMessage());
+        } finally {
+            if(in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+
+
         // 如果include指定了id的话，就不能直接把它里面的控件当成主xml中的控件来直接获得了，
         // 必须先获得这个xml布局文件，再通过布局文件findViewById来获得其子控件。
 //        View taskLayout = getLayoutInflater().inflate(R.layout.info, null);
@@ -177,7 +202,7 @@ public class MainActivity extends AbstractAsyncActivity {
         super.onResume();
         Log.d(DEBUG_TAG, "onResume");
 
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+//        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         isTrack = settings.getBoolean(getString(R.string.setting_record_track), true);
         if(isTrack) {
             updateInterval = Integer.valueOf(
@@ -892,17 +917,20 @@ public class MainActivity extends AbstractAsyncActivity {
         switch(panMode) {
             case 'L':
                 panMode = 'C';
-                ((Button)v).setText("C");
+//                ((Button)v).setText("C");
+                ((ImageButton)v).setImageResource(R.drawable.nav_c);
                 mLocService.setAutoPanMode(LocationDisplayManager.AutoPanMode.COMPASS);
                 break;
             case 'C':
                 panMode = 'N';
-                ((Button)v).setText("N");
+//                ((Button)v).setText("N");
+                ((ImageButton)v).setImageResource(R.drawable.nav_n);
                 mLocService.setAutoPanMode(LocationDisplayManager.AutoPanMode.NAVIGATION);
                 break;
             case 'N':
                 panMode = 'L';
-                ((Button)v).setText("L");
+//                ((Button)v).setText("L");
+                ((ImageButton)v).setImageResource(R.drawable.nav_l);
                 mLocService.setAutoPanMode(LocationDisplayManager.AutoPanMode.LOCATION);
                 break;
         }
@@ -910,7 +938,7 @@ public class MainActivity extends AbstractAsyncActivity {
 
     private void initMap() {
 
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+//        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         boolean isLocalMap = settings.getBoolean(getString(R.string.setting_local_map), false);
 
         TiledLayer baseLayer;

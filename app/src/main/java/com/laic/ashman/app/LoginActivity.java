@@ -1,11 +1,19 @@
 package com.laic.ashman.app;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.preference.PreferenceManager;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 import com.baidu.android.pushservice.PushConstants;
 import com.baidu.android.pushservice.PushManager;
@@ -14,6 +22,7 @@ import com.laic.ashman.app.rest.Message;
 import de.greenrobot.event.EventBus;
 import org.springframework.web.client.RestClientException;
 
+import java.io.*;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
@@ -26,15 +35,64 @@ public class LoginActivity extends AbstractAsyncActivity {
 
     private EditText user;
     private EditText password;
+    private ImageView head;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // setting default screen to login.xml
-        setContentView(R.layout.login);
+        setContentView(R.layout.xlogin);
 
         user = (EditText)findViewById(R.id.user);
         password = (EditText)findViewById(R.id.password);
+        head = (ImageView)findViewById(R.id.avator);
+
+        user.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                FileInputStream in = null;
+                try {
+                    in =  openFileInput(s + ".png");
+                    head.setImageBitmap(BitmapFactory.decodeStream(in));
+                } catch (FileNotFoundException e) {
+                    head.setImageResource(R.drawable.avator);
+                } finally {
+                    if(in != null) {
+                        try {
+                            in.close();
+                        } catch (IOException e) {
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        user.setText(settings.getString(getString(R.string.setting_recent_user), ""));
+
+        FileInputStream in = null;
+        try {
+            in =  openFileInput(user.getText().toString() + ".png");
+            head.setImageBitmap(BitmapFactory.decodeStream(in));
+        } catch (FileNotFoundException e) {
+            Log.w(TAG, e.getLocalizedMessage());
+        } finally {
+            if(in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                }
+            }
+        }
 
         EventBus.getDefault().register(this);
 
@@ -83,6 +141,30 @@ public class LoginActivity extends AbstractAsyncActivity {
         new FetchResourceTask().execute();
     }
 
+    private void saveImage(byte[] avator, String fileName) {
+        File photo=new File(getFilesDir(), fileName + ".png");
+
+        if (photo.exists()) {
+            photo.delete();
+        }
+
+        FileOutputStream fos = null;
+        try {
+            fos=new FileOutputStream(photo.getPath());
+
+            fos.write(avator);
+            fos.close();
+        } catch (java.io.IOException e) {
+            Log.e(TAG, e.getLocalizedMessage(), e);
+        } finally {
+            if(fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {}
+            }
+        }
+    }
+
     private void displayResponse(LoginMessage response) {
         if(!response.isOk()) {
             Toast.makeText(this, response.getMessage(), Toast.LENGTH_LONG).show();
@@ -90,6 +172,16 @@ public class LoginActivity extends AbstractAsyncActivity {
             getApplicationContext().setToken(response.getToken());
             getApplicationContext().setAccount(user.getText().toString());
             getApplicationContext().setUserName(response.getXm());
+
+            if(response.getImg() != null && response.getImg().length() > 0) {
+                byte[] avator = android.util.Base64.decode(response.getImg(), Base64.DEFAULT);
+                saveImage(avator, response.getZh());
+            }
+
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString(getString(R.string.setting_recent_user), response.getZh());
+            editor.commit();
 
             Intent i = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(i);

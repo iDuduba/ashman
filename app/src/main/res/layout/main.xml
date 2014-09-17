@@ -60,13 +60,25 @@
                 android:text="放空"/>
     </LinearLayout>
 
-    <Button android:layout_width="64dp"
-            android:layout_height="64dp"
+    <ImageButton android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_below="@id/userInfo"
-            android:layout_marginTop="5dp"
-            android:layout_marginLeft="5dp"
+            android:layout_alignParentRight="true"
+            android:layout_margin="5dp"
+            android:padding="4dp"
             android:onClick="onSwitchMode"
-            android:text="L"/>
+            android:background="#bb666666"
+            android:src="@drawable/nav_l"/>
+            <!--android:text="L"/>-->
+
+    <ImageView
+            android:id="@+id/avator"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="5dp"
+            android:scaleType="fitXY"
+            android:layout_below="@id/userInfo"
+            android:src="@drawable/avator" />
 
 
     <include layout="@layout/loglist"

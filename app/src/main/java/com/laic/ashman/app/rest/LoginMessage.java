@@ -9,6 +9,15 @@ public class LoginMessage extends Message {
     private String token;
     private String zh;
     private String xm;
+    private String img;
+
+    public String getImg() {
+        return img;
+    }
+
+    public void setImg(String img) {
+        this.img = img;
+    }
 
     public LoginMessage(int status, String message) {
         super(status, message);

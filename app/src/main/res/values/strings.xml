@@ -41,6 +41,7 @@
     <string name="setting_gps_update_interval">gps_update_interval</string>
     <string name="setting_ftp_upload_mode">ftp_upload_mode</string>
     <string name="setting_debug_mode">debug_mode</string>
+    <string name="setting_recent_user">recent_user</string>
 
     <string name="base_url">http://58.241.132.59:6080</string>
     <string name="base_path">/ewayqz/qztask.do</string>
