@@ -11,6 +11,7 @@ public class Message implements Serializable {
     public final static int NETERR = -1000;
 
     public final static String ACT_LOGIN = "login";
+    public final static String ACT_USERLIST = "userlist";
     public final static String ACT_TASKLIST = "tasklist";
     public final static String ACT_START = "depart";
     public final static String ACT_ARRIVE = "arrived";

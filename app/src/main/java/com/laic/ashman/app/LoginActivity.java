@@ -1,29 +1,28 @@
 package com.laic.ashman.app;
 
+import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
-import android.preference.PreferenceManager;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.Toast;
+import android.view.ViewGroup;
+import android.widget.*;
 import com.baidu.android.pushservice.PushConstants;
 import com.baidu.android.pushservice.PushManager;
+import com.laic.ashman.app.bo.Station;
+import com.laic.ashman.app.bo.User;
 import com.laic.ashman.app.rest.LoginMessage;
 import com.laic.ashman.app.rest.Message;
+import com.laic.ashman.app.rest.UserMessage;
 import de.greenrobot.event.EventBus;
 import org.springframework.web.client.RestClientException;
 
 import java.io.*;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,67 +31,86 @@ import java.util.Map;
  * Created by duduba on 14-5-13.
  */
 public class LoginActivity extends AbstractAsyncActivity {
+    final static String DEBUG_TAG = "LoginActivity";
 
-    private EditText user;
-    private EditText password;
+    private Spinner stations;
+    private Spinner users;
     private ImageView head;
+    private Button btnLogin;
+
+    private UserAdapter usersAdapter;
+    private ArrayAdapter<String> stationsAdapter;
+
+    private ArrayList<User> userList = new ArrayList();
+    private List<String> stationList = new ArrayList();;
+
+    private Station[] ss = null;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // setting default screen to login.xml
-        setContentView(R.layout.xlogin);
+        setContentView(R.layout.login);
 
-        user = (EditText)findViewById(R.id.user);
-        password = (EditText)findViewById(R.id.password);
+        stations = (Spinner)findViewById(R.id.stations);
+        users = (Spinner)findViewById(R.id.users);
         head = (ImageView)findViewById(R.id.avator);
+        btnLogin = (Button) findViewById(R.id.btnLogin);
 
-        user.addTextChangedListener(new TextWatcher() {
+        userList.add(new User("0000", " - 选择用户 - "));
+        usersAdapter = new UserAdapter(this, R.layout.spinner_item, userList);
+        usersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        users.setAdapter(usersAdapter);
+
+        stationList.add(" - 选择救援站 - ");
+        stationsAdapter = new ArrayAdapter(this,R.layout.spinner_item,stationList);
+        stationsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        stations.setAdapter(stationsAdapter);
+
+        stations.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                String ss = parent.getItemAtPosition(position).toString();
+                if(!userIsInteracting)
+                    return;
 
-            }
+                User[] _users = ss[position].getUsers();
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                FileInputStream in = null;
-                try {
-                    in =  openFileInput(s + ".png");
-                    head.setImageBitmap(BitmapFactory.decodeStream(in));
-                } catch (FileNotFoundException e) {
-                    head.setImageResource(R.drawable.avator);
-                } finally {
-                    if(in != null) {
-                        try {
-                            in.close();
-                        } catch (IOException e) {
-                        }
-                    }
+                userList.clear();
+                for(User u : _users) {
+                    userList.add(u);
+                }
+                usersAdapter.notifyDataSetChanged();
+
+                int pu = users.getSelectedItemPosition();
+                if(pu < userList.size()) {
+                    User u = userList.get(pu);
+                    new LoginTask(u.getZh()).execute();
                 }
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
+            public void onNothingSelected(AdapterView<?> parent) {
 
             }
         });
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        user.setText(settings.getString(getString(R.string.setting_recent_user), ""));
 
-        FileInputStream in = null;
-        try {
-            in =  openFileInput(user.getText().toString() + ".png");
-            head.setImageBitmap(BitmapFactory.decodeStream(in));
-        } catch (FileNotFoundException e) {
-            Log.w(TAG, e.getLocalizedMessage());
-        } finally {
-            if(in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                }
+        users.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if(!userIsInteracting)
+                    return;
+
+                User u = userList.get(position);
+                new LoginTask(u.getZh()).execute();
             }
-        }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         EventBus.getDefault().register(this);
 
@@ -112,6 +130,20 @@ public class LoginActivity extends AbstractAsyncActivity {
             PushManager.setTags(getApplicationContext(), tags);
         }
 
+    }
+
+    private boolean userIsInteracting = false;
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        userIsInteracting = true;
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        new UserListTask().execute();
     }
 
     @Override
@@ -138,7 +170,9 @@ public class LoginActivity extends AbstractAsyncActivity {
     }
 
     public void onLogin(View view) {
-        new FetchResourceTask().execute();
+        Intent i = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(i);
+        finish();
     }
 
     private void saveImage(byte[] avator, String fileName) {
@@ -165,31 +199,85 @@ public class LoginActivity extends AbstractAsyncActivity {
         }
     }
 
-    private void displayResponse(LoginMessage response) {
+    private void handleLogin(LoginMessage response) {
         if(!response.isOk()) {
             Toast.makeText(this, response.getMessage(), Toast.LENGTH_LONG).show();
+            head.setImageResource(R.drawable.avator);
+            btnLogin.setEnabled(false);
         } else {
+            btnLogin.setEnabled(true);
+
             getApplicationContext().setToken(response.getToken());
-            getApplicationContext().setAccount(user.getText().toString());
+            getApplicationContext().setAccount(response.getZh());
             getApplicationContext().setUserName(response.getXm());
 
             if(response.getImg() != null && response.getImg().length() > 0) {
                 byte[] avator = android.util.Base64.decode(response.getImg(), Base64.DEFAULT);
+                head.setImageBitmap(BitmapFactory.decodeByteArray(avator, 0, avator.length));
                 saveImage(avator, response.getZh());
+            } else {
+                head.setImageResource(R.drawable.avator);
             }
-
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putString(getString(R.string.setting_recent_user), response.getZh());
-            editor.commit();
-
-            Intent i = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(i);
-            finish();
         }
     }
 
-    private class FetchResourceTask extends AsyncTask<Void, Void, LoginMessage> {
+    private void handleUserList(UserMessage response) {
+        if(!response.isOk()) {
+            Toast.makeText(this, response.getMessage(), Toast.LENGTH_LONG).show();
+        } else {
+            stationList.clear();
+            ss = response.getData();
+            for(Station s : ss) {
+                stationList.add(s.getQzzd());
+            }
+            stationsAdapter.notifyDataSetChanged();
+
+            if(ss != null && ss.length > 0) {
+                User[] _users = ss[0].getUsers();
+                userList.clear();
+                for (User u : _users) {
+                    userList.add(u);
+                }
+                usersAdapter.notifyDataSetChanged();
+                new LoginTask(_users[0].getZh()).execute();
+            }
+        }
+    }
+
+    private class UserListTask extends AsyncTask<Void, Void, UserMessage> {
+        @Override
+        protected void onPreExecute() {
+            showLoadingProgressDialog("获取用户列表，请等待......");
+        }
+
+        @Override
+        protected UserMessage doInBackground(Void... params) {
+            Map paras = new HashMap<String, Object>();
+
+            URI targetUrl = getApplicationContext().createGetUrl(Message.ACT_USERLIST, paras);
+
+            try {
+                UserMessage response = getApplicationContext().getRestTemplate().getForObject(targetUrl, UserMessage.class);
+                return response;
+            } catch (RestClientException e) {
+                Log.e(TAG, e.getLocalizedMessage(), e);
+                return new UserMessage(Message.NETERR, getString(R.string.com_network_err));
+            }
+        }
+
+        @Override
+        protected void onPostExecute(UserMessage result) {
+            dismissProgressDialog();
+            handleUserList(result);
+        }
+    }
+
+    private class LoginTask extends AsyncTask<Void, Void, LoginMessage> {
+
+        private String account;
+        public LoginTask(String account) {
+            this.account = account;
+        }
 
         @Override
         protected void onPreExecute() {
@@ -199,8 +287,8 @@ public class LoginActivity extends AbstractAsyncActivity {
         @Override
         protected LoginMessage doInBackground(Void... params) {
             Map paras = new HashMap<String, Object>();
-            paras.put("account", user.getText().toString());
-            paras.put("password", Util.encodeByMD5(password.getText().toString()));
+            paras.put("account", account);
+            paras.put("password", "");
 
             URI targetUrl = getApplicationContext().createGetUrl(Message.ACT_LOGIN, paras);
 
@@ -220,9 +308,38 @@ public class LoginActivity extends AbstractAsyncActivity {
         @Override
         protected void onPostExecute(LoginMessage result) {
             dismissProgressDialog();
-            displayResponse(result);
+            handleLogin(result);
         }
 
     }
 
+
+
+    class UserAdapter extends ArrayAdapter<User> {
+
+        ArrayList<User> user;
+
+        public UserAdapter(Activity context, int resource, ArrayList<User> user) {
+            super(context, resource, user);
+            this.user = user;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            TextView v = (TextView)super.getView(position, convertView, parent);
+            User current = user.get(position);
+            v.setText(current.getXm());
+            return v;
+        }
+
+        @Override
+        public View getDropDownView(int position, View convertView, ViewGroup parent) {
+            TextView v = (TextView)super.getView(position, convertView, parent);
+            User current = user.get(position);
+            v.setText(current.getXm());
+            return v;
+        }
+
+
+    }
 }

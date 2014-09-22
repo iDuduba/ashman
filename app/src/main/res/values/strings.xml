@@ -25,6 +25,7 @@
     <string name="action_search">搜索</string>
     <string name="action_settings">设置</string>
     <string name="action_accidents">事故</string>
+    <string name="action_logout">注销</string>
     <string name="action_task">任务列表</string>
     <string name="action_cancel_task">取消任务</string>
     <string name="action_open_loglist">调试信息</string>

@@ -163,7 +163,7 @@ public class MainActivity extends AbstractAsyncActivity {
 
         FileInputStream in = null;
         try {
-            in =  openFileInput(settings.getString(getString(R.string.setting_recent_user), "") + ".png");
+            in =  openFileInput(getApplicationContext().getAccount() + ".png");
             imgAvator.setImageBitmap(BitmapFactory.decodeStream(in));
         } catch (FileNotFoundException e) {
             Log.w(TAG, e.getLocalizedMessage());
@@ -431,6 +431,9 @@ public class MainActivity extends AbstractAsyncActivity {
             case R.id.action_settings:
                 openSettings();
                 return true;
+            case R.id.action_logout:
+                logout();
+                return true;
             case R.id.action_cancel_task:
                 cancelTask();
                 return true;
@@ -446,6 +449,16 @@ public class MainActivity extends AbstractAsyncActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void logout() {
+        getApplicationContext().setToken(null);
+        getApplicationContext().setAccount(null);
+        getApplicationContext().setUserName(null);
+
+        Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+        startActivity(i);
+        finish();
     }
 
     private void openTaskList() {

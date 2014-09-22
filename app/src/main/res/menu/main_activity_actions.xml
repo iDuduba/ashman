@@ -29,4 +29,8 @@
     <item android:id="@+id/action_open_loglist"
           android:title="@string/action_open_loglist"
           android:showAsAction="never" />
+
+    <item android:id="@+id/action_logout"
+          android:title="@string/action_logout"
+          android:showAsAction="never" />
 </menu>

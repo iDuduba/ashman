@@ -24,9 +24,9 @@ public class MainApplication extends FrontiaApplication {
     private static Context sContext;
 
     private RestTemplate restTemplate;
-    private String token;
-    private String account;
-    private String userName;
+    private String token = null;
+    private String account = null;
+    private String userName = null;
 
     @Override
     public void onCreate() {
