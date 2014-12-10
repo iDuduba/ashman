@@ -25,6 +25,7 @@ public class Message implements Serializable {
     public final static String ATT_STATUS = "status";
     public final static String ATT_ACCOUNT = "account";
     public final static String ATT_TOKEN = "token";
+    public final static String ATT_TIME = "time";
 
     private int status;
     private String message;

@@ -140,10 +140,6 @@
             android:name="api_key"
             android:value="tDsP2EPjXsjAZ4G4QOk6v5s9" />
 
-        <service
-            android:name="com.laic.ashman.app.PhotoUploadService"
-            android:exported="false" >
-        </service>
     </application>
 
 </manifest>

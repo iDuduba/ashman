@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.baidu.frontia.FrontiaApplication;
 import com.laic.ashman.app.rest.HttpUtils;
 import com.laic.ashman.app.rest.Message;
+import org.joda.time.DateTime;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
@@ -81,6 +82,8 @@ public class MainApplication extends FrontiaApplication {
             builder.queryParam(Message.ATT_ACCOUNT, account);
             builder.queryParam(Message.ATT_TOKEN, token);
         }
+
+        builder.queryParam(Message.ATT_TIME, new DateTime().toString("yyyyMMddHHmmss"));
 
         URI targetUrl= builder.build().toUri();
 

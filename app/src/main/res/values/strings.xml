@@ -44,9 +44,9 @@
     <string name="setting_debug_mode">debug_mode</string>
     <string name="setting_recent_user">recent_user</string>
 
-    <string name="base_url">http://58.241.132.59:6080</string>
+    <string name="base_url">http://58.241.132.60</string>
     <string name="base_path">/ewayqz/qztask.do</string>
-    <string name="ftp_host">58.241.132.59</string>
+    <string name="ftp_host">58.241.132.60</string>
     <string name="ftp_user">qzuser</string>
     <string name="ftp_password">qzuser!@#</string>
     <string name="com_network_err">网络故障,稍后重试</string>
