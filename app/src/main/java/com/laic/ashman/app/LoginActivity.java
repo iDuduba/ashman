@@ -42,7 +42,7 @@ public class LoginActivity extends AbstractAsyncActivity {
     private ArrayAdapter<String> stationsAdapter;
 
     private ArrayList<User> userList = new ArrayList();
-    private List<String> stationList = new ArrayList();;
+    private List<String> stationList = new ArrayList();
 
     private Station[] ss = null;
 
